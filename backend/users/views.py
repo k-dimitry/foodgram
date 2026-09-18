@@ -1,14 +1,16 @@
 from rest_framework import mixins, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    BasePermission,
+    IsAuthenticated,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from .models import User
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
+from .models import User
 from .serializers import (
     AvatarSerializer,
     SetPasswordSerializer,

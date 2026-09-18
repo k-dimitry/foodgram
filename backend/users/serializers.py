@@ -1,11 +1,12 @@
 import base64
 import uuid
+
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from .models import Follow, User
-
-from django.core.files.base import ContentFile
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -97,7 +98,6 @@ class SetPasswordSerializer(serializers.Serializer):
         return value
 
     def validate_new_password(self, value: str) -> str:
-        from django.contrib.auth.password_validation import validate_password
         validate_password(value, self.context['request'].user)
         return value
 
