@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, RecipeIngredient, Tag
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 
 
 @admin.register(Tag)
@@ -33,10 +40,32 @@ class RecipeIngredientInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     """Админка рецептов."""
 
-    list_display = ('id', 'name', 'author', 'pub_date')
+    list_display = ('id', 'name', 'author', 'pub_date', 'favorites_count')
     list_filter = ('tags',)
     search_fields = ('name', 'author__username', 'author__email')
-    readonly_fields = ('pub_date', 'short_code')
+    readonly_fields = ('pub_date', 'short_code', 'favorites_count')
     inlines = (RecipeIngredientInline,)
     filter_horizontal = ('tags',)
     ordering = ('-pub_date',)
+
+    @admin.display(description='В избранном')
+    def favorites_count(self, obj: Recipe) -> int:
+        return obj.favorited_by.count()
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    """Админка избранного."""
+
+    list_display = ('id', 'user', 'recipe')
+    search_fields = ('user__username', 'user__email', 'recipe__name')
+    ordering = ('id',)
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    """Админка списков покупок."""
+
+    list_display = ('id', 'user', 'recipe')
+    search_fields = ('user__username', 'user__email', 'recipe__name')
+    ordering = ('id',)
