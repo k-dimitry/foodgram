@@ -1,0 +1,16 @@
+[run]
+omit =
+    */migrations/*
+    */tests.py
+    */conftest.py
+    tests/*
+    */__init__.py
+    config/asgi.py
+    config/wsgi.py
+    manage.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    raise NotImplementedError
