@@ -9,3 +9,11 @@ def _fast_password_hashing(settings):
     settings.PASSWORD_HASHERS = [
         f'{MD5PasswordHasher.__module__}.{MD5PasswordHasher.__name__}',
     ]
+
+
+@pytest.fixture(autouse=True)
+def _media_root_in_tmp(settings, tmp_path):
+    """Медиа-файлы из тестов пишутся в tmp, не засоряют backend/media/."""
+    media_root = tmp_path / 'media'
+    media_root.mkdir(parents=True, exist_ok=True)
+    settings.MEDIA_ROOT = media_root
