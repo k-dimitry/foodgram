@@ -1,18 +1,28 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
 
-from users.permissions import IsAuthorOrReadOnly
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from users.permissions import IsAuthorOrReadOnly
+
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from .serializers import (
     IngredientSerializer,
     RecipeCreateSerializer,
@@ -168,6 +178,40 @@ class RecipeViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=('get',),
+        url_path='download_shopping_cart',
+        permission_classes=(IsAuthenticated,),
+    )
+    def download_shopping_cart(self, request):
+        """GET /api/recipes/download_shopping_cart/ — txt со списком покупок."""
+        ingredients = (
+            RecipeIngredient.objects
+            .filter(recipe__in_shopping_carts__user=request.user)
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(total=Sum('amount'))
+            .order_by('ingredient__name', 'ingredient__measurement_unit')
+        )
+
+        lines = [
+            f'{item["ingredient__name"]} '
+            f'({item["ingredient__measurement_unit"]}) — '
+            f'{item["total"]}'
+            for item in ingredients
+        ]
+
+        content = '\n'.join(lines) if lines else 'Список покупок пуст.'
+
+        response = HttpResponse(
+            content,
+            content_type='text/plain; charset=utf-8',
+        )
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_list.txt"'
+        )
+        return response
 
 
 class ShortLinkRedirectView(View):
