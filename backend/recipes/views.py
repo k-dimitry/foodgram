@@ -1,18 +1,23 @@
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
 
 from users.permissions import IsAuthorOrReadOnly
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .models import Ingredient, Tag, Recipe
+from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .serializers import (
     IngredientSerializer,
     RecipeCreateSerializer,
     RecipeListSerializer,
+    RecipeMinifiedSerializer,
     RecipeUpdateSerializer,
     TagSerializer,
 )
@@ -91,6 +96,78 @@ class RecipeViewSet(ModelViewSet):
         recipe = self.get_object()
         link = request.build_absolute_uri(f'/s/{recipe.short_code}')
         return Response({'short-link': link}, status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=('post', 'delete'),
+        url_path='favorite',
+        permission_classes=(IsAuthenticated,),
+    )
+    def favorite(self, request, pk=None):
+        """POST — добавить в избранное, DELETE — убрать."""
+        recipe = self.get_object()
+
+        if request.method == 'POST':
+            _, created = Favorite.objects.get_or_create(
+                user=request.user,
+                recipe=recipe,
+            )
+            if not created:
+                return Response(
+                    {'detail': 'Рецепт уже в избранном.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = RecipeMinifiedSerializer(
+                recipe, context={'request': request},
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        deleted, _ = Favorite.objects.filter(
+            user=request.user,
+            recipe=recipe,
+        ).delete()
+        if not deleted:
+            return Response(
+                {'detail': 'Рецепта нет в избранном.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=('post', 'delete'),
+        url_path='shopping_cart',
+        permission_classes=(IsAuthenticated,),
+    )
+    def shopping_cart(self, request, pk=None):
+        """POST — добавить в список покупок, DELETE — убрать."""
+        recipe = self.get_object()
+
+        if request.method == 'POST':
+            _, created = ShoppingCart.objects.get_or_create(
+                user=request.user,
+                recipe=recipe,
+            )
+            if not created:
+                return Response(
+                    {'detail': 'Рецепт уже в списке покупок.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = RecipeMinifiedSerializer(
+                recipe, context={'request': request},
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        deleted, _ = ShoppingCart.objects.filter(
+            user=request.user,
+            recipe=recipe,
+        ).delete()
+        if not deleted:
+            return Response(
+                {'detail': 'Рецепта нет в списке покупок.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ShortLinkRedirectView(View):
