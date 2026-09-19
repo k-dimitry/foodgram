@@ -143,3 +143,42 @@ class AvatarSerializer(serializers.Serializer):
         filename = f'{uuid.uuid4().hex}.{ext}'
         user.avatar.save(filename, ContentFile(decoded), save=True)
         return user
+
+
+class UserWithRecipesSerializer(UserReadSerializer):
+    """UserWithRecipes: UserRead + recipes (с ограничением) + recipes_count."""
+
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(UserReadSerializer.Meta):
+        fields = UserReadSerializer.Meta.fields + ('recipes', 'recipes_count')
+        read_only_fields = fields
+
+    def _get_recipes_limit(self) -> int | None:
+        """Читает ?recipes_limit=N из query-параметров."""
+        request = self.context.get('request')
+        if not request:
+            return None
+        value = request.query_params.get('recipes_limit')
+        if not value:
+            return None
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    def get_recipes(self, obj: User) -> list[dict]:
+        # Локальный импорт для обхода циклической зависимости
+        from recipes.serializers import RecipeMinifiedSerializer
+
+        qs = obj.recipes.all().order_by('-pub_date')
+        limit = self._get_recipes_limit()
+        if limit is not None:
+            qs = qs[:limit]
+        return RecipeMinifiedSerializer(
+            qs, many=True, context=self.context,
+        ).data
+
+    def get_recipes_count(self, obj: User) -> int:
+        return obj.recipes.count()

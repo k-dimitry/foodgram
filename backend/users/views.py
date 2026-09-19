@@ -10,13 +10,14 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import User
+from .models import Follow, User
 from .serializers import (
     AvatarSerializer,
     SetPasswordSerializer,
     TokenCreateSerializer,
     UserCreateSerializer,
     UserReadSerializer,
+    UserWithRecipesSerializer,
 )
 
 
@@ -26,14 +27,6 @@ class UserViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Пользователи:
-
-    - GET  /api/users/       — список (пагинация);
-    - POST /api/users/       — регистрация;
-    - GET  /api/users/{id}/  — профиль;
-    - GET  /api/users/me/    — текущий пользователь (Token).
-    """
-
     queryset = User.objects.all().order_by('id')
 
     def get_serializer_class(self):
@@ -51,6 +44,48 @@ class UserViewSet(
         """GET /api/users/me/ — текущий пользователь."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=('post', 'delete'),
+        url_path='subscribe',
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscribe(self, request, pk=None):
+        """POST — подписаться, DELETE — отписаться."""
+        author = self.get_object()
+
+        if author == request.user:
+            return Response(
+                {'detail': 'Нельзя подписаться на себя.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if request.method == 'POST':
+            _, created = Follow.objects.get_or_create(
+                user=request.user,
+                author=author,
+            )
+            if not created:
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого пользователя.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = UserWithRecipesSerializer(
+                author, context={'request': request},
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        deleted, _ = Follow.objects.filter(
+            user=request.user,
+            author=author,
+        ).delete()
+        if not deleted:
+            return Response(
+                {'detail': 'Вы не подписаны на этого пользователя.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LoginView(APIView):
