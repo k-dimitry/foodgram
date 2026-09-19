@@ -1,6 +1,10 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework import status
 
 from users.permissions import IsAuthorOrReadOnly
 
@@ -75,3 +79,23 @@ class RecipeViewSet(ModelViewSet):
             qs = qs.filter(tags__slug__in=tags).distinct()
 
         return qs
+
+    @action(
+        detail=True,
+        methods=('get',),
+        url_path='get-link',
+        permission_classes=(AllowAny,),
+    )
+    def get_link(self, request, pk=None):
+        """GET /api/recipes/{id}/get-link/ — короткая ссылка на рецепт."""
+        recipe = self.get_object()
+        link = request.build_absolute_uri(f'/s/{recipe.short_code}')
+        return Response({'short-link': link}, status=status.HTTP_200_OK)
+
+
+class ShortLinkRedirectView(View):
+    """GET /s/<short_code>/ — редирект на SPA-роут страницы рецепта."""
+
+    def get(self, request, short_code: str):
+        recipe = get_object_or_404(Recipe, short_code=short_code)
+        return redirect(f'/recipes/{recipe.id}')
