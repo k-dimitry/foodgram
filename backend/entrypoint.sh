@@ -19,7 +19,10 @@ echo "Running migrations..."
 python manage.py migrate --noinput
 
 echo "Loading ingredients..."
-python manage.py load_ingredients || echo "load_ingredients skipped/failed — continuing"
+python manage.py load_ingredients
+
+echo "Seeding database..."
+python manage.py seed
 
 echo "Collecting static..."
 python manage.py collectstatic --noinput
