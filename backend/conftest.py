@@ -4,7 +4,14 @@ from django.contrib.auth.hashers import MD5PasswordHasher
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from tests.factories.recipes import IngredientFactory, RecipeFactory, TagFactory
+from tests.factories.recipes import (
+    FavoriteFactory,
+    IngredientFactory,
+    RecipeFactory,
+    RecipeIngredientFactory,
+    ShoppingCartFactory,
+    TagFactory,
+)
 from tests.factories.users import FollowFactory, UserFactory
 
 
@@ -64,6 +71,24 @@ def recipe(user):
 def follow(db):
     """Подписка между двумя свежими пользователями."""
     return FollowFactory()
+
+
+@pytest.fixture
+def favorite(user, recipe):
+    """Избранное: user + recipe."""
+    return FavoriteFactory(user=user, recipe=recipe)
+
+
+@pytest.fixture
+def shopping_cart(user, recipe):
+    """Список покупок: user + recipe."""
+    return ShoppingCartFactory(user=user, recipe=recipe)
+
+
+@pytest.fixture
+def recipe_ingredient(recipe, ingredient):
+    """Связь recipe ↔ ingredient с amount=100."""
+    return RecipeIngredientFactory(recipe=recipe, ingredient=ingredient)
 
 
 @pytest.fixture
