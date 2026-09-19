@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from tests.factories.recipes import IngredientFactory, RecipeFactory, TagFactory
-from tests.factories.users import UserFactory
+from tests.factories.users import FollowFactory, UserFactory
 
 
 @pytest.fixture(autouse=True)
@@ -58,6 +58,12 @@ def ingredient(db):
 def recipe(user):
     """Рецепт, автор — user."""
     return RecipeFactory(author=user)
+
+
+@pytest.fixture
+def follow(db):
+    """Подписка между двумя свежими пользователями."""
+    return FollowFactory()
 
 
 @pytest.fixture
