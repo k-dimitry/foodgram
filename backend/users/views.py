@@ -87,6 +87,25 @@ class UserViewSet(
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=False,
+        methods=('get',),
+        url_path='subscriptions',
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscriptions(self, request):
+        """GET /api/users/subscriptions/ — кого читает текущий пользователь."""
+        authors = (
+            User.objects
+            .filter(subscribers__user=request.user)
+            .order_by('id')
+        )
+        page = self.paginate_queryset(authors)
+        serializer = UserWithRecipesSerializer(
+            page, many=True, context={'request': request},
+        )
+        return self.get_paginated_response(serializer.data)
+
 
 class LoginView(APIView):
     """POST /api/auth/token/login/ — получить токен по email и паролю."""

@@ -174,6 +174,8 @@ class UserWithRecipesSerializer(UserReadSerializer):
 
         qs = obj.recipes.all().order_by('-pub_date')
         limit = self._get_recipes_limit()
+        if limit is not None and limit < 0:
+            limit = 0
         if limit is not None:
             qs = qs[:limit]
         return RecipeMinifiedSerializer(
