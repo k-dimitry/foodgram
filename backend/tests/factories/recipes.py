@@ -51,16 +51,23 @@ class IngredientFactory(factory.django.DjangoModelFactory):
 
 
 class RecipeFactory(factory.django.DjangoModelFactory):
-    """Рецепт с автором и картинкой. short_code генерится в save()."""
+    """Рецепт с автором и картинкой. short_code генерируется в save()."""
 
     class Meta:
         model = Recipe
+        skip_postgeneration_save = True
 
     author = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda n: f'Рецепт {n}')
     image = factory.LazyFunction(_make_mini_png)
     text = factory.Faker('text', max_nb_chars=200)
     cooking_time = 10
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+        self.tags.set(extracted)
 
 
 class RecipeIngredientFactory(factory.django.DjangoModelFactory):
