@@ -129,7 +129,6 @@ class AvatarSerializer(serializers.Serializer):
         data_uri = self.validated_data['avatar']
 
         header, b64_data = data_uri.split(';base64,', 1)
-        # header вида "data:image/png"
         ext = header.split('/')[-1].lower()
         if ext == 'jpeg':
             ext = 'jpg'

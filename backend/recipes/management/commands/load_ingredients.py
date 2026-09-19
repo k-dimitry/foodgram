@@ -32,14 +32,12 @@ class Command(BaseCommand):
         with path.open(encoding='utf-8') as f:
             reader = csv.reader(f)
             first = next(reader, None)
-            # Первую строку считаем заголовком, если это не «данные»
             if first and first[0].strip().lower() not in (
                     'name', 'название', 'ингредиент',
             ):
                 rows.append(first)
             rows.extend(reader)
 
-        # Дедуп внутри файла + учёт уже существующих
         unique: dict[tuple[str, str], Ingredient] = {}
         for row in rows:
             if len(row) < 2:
