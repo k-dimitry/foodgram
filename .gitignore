@@ -23,3 +23,8 @@ backend/static/
 .idea/
 .vscode/
 *.swp
+# pytest
+.pytest_cache/
+test_db.sqlite3
+.coverage
+htmlcov/
