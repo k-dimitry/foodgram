@@ -141,3 +141,52 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  deploy:
+    name: Deploy to server
+    needs:
+      - build-and-push-backend
+      - build-and-push-frontend
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy infra and docs to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "infra/docker-compose.production.yml,infra/nginx.conf,docs/"
+          target: "/opt/foodgram/"
+          strip_components: 0
+          overwrite: true
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            cd /opt/foodgram/infra
+            docker compose -f docker-compose.production.yml pull
+            docker compose -f docker-compose.production.yml up -d
+            docker compose -f docker-compose.production.yml ps
+            docker image prune -f
+
+      - name: Send Telegram notification
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ Foodgram: деплой прошёл успешно
+            Commit: ${{ github.sha }}
+            Автор: ${{ github.actor }}
+            Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
