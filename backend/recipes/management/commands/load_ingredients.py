@@ -17,7 +17,7 @@ class Command(BaseCommand):
             '--path',
             type=str,
             default=str(
-                Path(settings.BASE_DIR).parent / 'data' / 'ingredients.csv'
+                Path(settings.BASE_DIR) / 'data' / 'ingredients.csv'
             ),
             help='Путь к CSV-файлу с ингредиентами.',
         )
