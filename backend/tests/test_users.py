@@ -1,9 +1,11 @@
 """Тесты моделей приложения users."""
-import pytest
+
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
+import pytest
 
 from users.models import Follow
+
 
 User = get_user_model()
 

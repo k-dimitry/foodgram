@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,11 +12,18 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [
-    h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()
+    h.strip()
+    for h in os.getenv(
+        'ALLOWED_HOSTS',
+        'localhost,127.0.0.1',
+    ).split(',')
+    if h.strip()
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()
+    o.strip()
+    for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if o.strip()
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -26,10 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
     'rest_framework.authtoken',
-
     'users',
     'recipes',
 ]

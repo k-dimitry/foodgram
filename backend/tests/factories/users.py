@@ -1,8 +1,9 @@
 """Фабрики для моделей приложения users."""
-import factory
 from django.contrib.auth import get_user_model
+import factory
 
 from users.models import Follow
+
 
 User = get_user_model()
 

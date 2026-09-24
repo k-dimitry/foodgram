@@ -43,33 +43,40 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Персональные данные', {
-            'fields': ('username', 'first_name', 'last_name', 'avatar')
-        }),
-        ('Права', {
-            'fields': (
-                'is_active',
-                'is_staff',
-                'is_superuser',
-                'groups',
-                'user_permissions',
-            )
-        }),
+        (
+            'Персональные данные',
+            {'fields': ('username', 'first_name', 'last_name', 'avatar')},
+        ),
+        (
+            'Права',
+            {
+                'fields': (
+                    'is_active',
+                    'is_staff',
+                    'is_superuser',
+                    'groups',
+                    'user_permissions',
+                )
+            },
+        ),
         ('Даты', {'fields': ('last_login', 'date_joined')}),
     )
 
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': (
-                'email',
-                'username',
-                'first_name',
-                'last_name',
-                'password1',
-                'password2',
-            ),
-        }),
+        (
+            None,
+            {
+                'classes': ('wide',),
+                'fields': (
+                    'email',
+                    'username',
+                    'first_name',
+                    'last_name',
+                    'password1',
+                    'password2',
+                ),
+            },
+        ),
     )
 
 
@@ -78,6 +85,11 @@ class FollowAdmin(admin.ModelAdmin):
     """Админка подписок."""
 
     list_display = ('id', 'user', 'author')
-    search_fields = ('user__email', 'user__username', 'author__email', 'author__username')
+    search_fields = (
+        'user__email',
+        'user__username',
+        'author__email',
+        'author__username',
+    )
     list_filter = ()
     ordering = ('id',)

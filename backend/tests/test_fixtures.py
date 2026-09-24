@@ -1,4 +1,5 @@
 """Проверка, что все клиенты и объекты работают."""
+
 from tests.factories.users import UserFactory
 from users.models import User
 
@@ -47,7 +48,9 @@ def test_auth_client_authenticated_as_user(auth_client, user):
 
 
 def test_another_user_client_authenticated_as_another_user(
-        another_user_client, another_user, user,
+    another_user_client,
+    another_user,
+    user,
 ):
     response = another_user_client.get('/api/users/me/')
 
@@ -64,7 +67,9 @@ def test_admin_client_authenticated_as_admin(admin_client, admin_user):
     assert response.data['email'] == admin_user.email
 
 
-def test_auth_client_factory_creates_client_for_arbitrary_user(auth_client_factory):
+def test_auth_client_factory_creates_client_for_arbitrary_user(
+    auth_client_factory,
+):
     custom_user = UserFactory()
     client = auth_client_factory(custom_user)
 

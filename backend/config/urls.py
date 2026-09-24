@@ -5,6 +5,7 @@ from django.urls import include, path, re_path
 
 from recipes.views import ShortLinkRedirectView
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
@@ -17,4 +18,7 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )

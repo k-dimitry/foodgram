@@ -131,7 +131,8 @@ class Recipe(models.Model):
                     break
             else:
                 raise RuntimeError(
-                    'Не удалось сгенерировать уникальный short_code за 10 попыток'
+                    'Не удалось сгенерировать '
+                    'уникальный short_code за 10 попыток'
                 )
         super().save(*args, **kwargs)
 

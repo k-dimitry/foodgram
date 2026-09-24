@@ -1,7 +1,8 @@
 """Тесты моделей приложения recipes."""
-import pytest
+
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
+import pytest
 
 from recipes.models import (
     Favorite,
@@ -102,7 +103,7 @@ def test_recipe_deleted_on_author_cascade(recipe):
 
 
 def test_recipe_ingredient_str_contains_recipe_ingredient_and_amount(
-        recipe_ingredient,
+    recipe_ingredient,
 ):
     expected = (
         f'{recipe_ingredient.recipe.name}: '
@@ -126,7 +127,9 @@ def test_recipe_ingredient_duplicate_raises_integrity_error(recipe_ingredient):
         )
 
 
-def test_recipe_ingredient_amount_zero_raises_integrity_error(recipe, ingredient):
+def test_recipe_ingredient_amount_zero_raises_integrity_error(
+    recipe, ingredient
+):
     with pytest.raises(IntegrityError), transaction.atomic():
         RecipeIngredientFactory(recipe=recipe, ingredient=ingredient, amount=0)
 

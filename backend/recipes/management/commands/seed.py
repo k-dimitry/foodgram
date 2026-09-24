@@ -1,6 +1,7 @@
 """Seed-команда: наполняет БД тегами, пользователями и рецептами.
 Идемпотентна.
 """
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -12,6 +13,7 @@ from recipes.models import (
     Tag,
 )
 from recipes.serializers import _decode_image
+
 
 User = get_user_model()
 
@@ -151,7 +153,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--flush',
             action='store_true',
-            help='Удалить сид-пользователей (CASCADE их рецепты) и сид-теги перед созданием',
+            help='Удалить сид-пользователей '
+            '(CASCADE их рецепты) и сид-теги перед созданием',
         )
 
     def handle(self, *args, **options):
@@ -163,12 +166,14 @@ class Command(BaseCommand):
             users_created = self._seed_users()
             recipes_created = self._seed_recipes()
 
-        self.stdout.write(self.style.SUCCESS(
-            f'\nSeed complete: '
-            f'tags +{tags_created}, '
-            f'users +{users_created}, '
-            f'recipes +{recipes_created}'
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'\nSeed complete: '
+                f'tags +{tags_created}, '
+                f'users +{users_created}, '
+                f'recipes +{recipes_created}'
+            )
+        )
 
     def _flush(self):
         """Удаляет сид-данные. Ингредиенты не трогает."""
@@ -178,9 +183,11 @@ class Command(BaseCommand):
         deleted_tags = Tag.objects.filter(
             slug__in=[t[1] for t in TAGS],
         ).delete()
-        self.stdout.write(self.style.WARNING(
-            f'Flush: users → {deleted_users[0]}, tags → {deleted_tags[0]}'
-        ))
+        self.stdout.write(
+            self.style.WARNING(
+                f'Flush: users → {deleted_users[0]}, tags → {deleted_tags[0]}'
+            )
+        )
 
     def _seed_tags(self) -> int:
         created = 0
@@ -191,7 +198,9 @@ class Command(BaseCommand):
             )
             if is_new:
                 created += 1
-        self.stdout.write(f'Tags: {created} created, {len(TAGS) - created} existing')
+        self.stdout.write(
+            f'Tags: {created} created, {len(TAGS) - created} existing'
+        )
         return created
 
     def _seed_users(self) -> int:
@@ -207,7 +216,9 @@ class Command(BaseCommand):
                 user.set_password(password)
                 user.save()
                 created += 1
-        self.stdout.write(f'Users: {created} created, {len(USERS) - created} existing')
+        self.stdout.write(
+            f'Users: {created} created, {len(USERS) - created} existing'
+        )
         return created
 
     def _seed_recipes(self) -> int:
@@ -216,7 +227,9 @@ class Command(BaseCommand):
 
         for data in RECIPES:
             author = User.objects.get(email=self._email_of(data['author']))
-            if Recipe.objects.filter(name=data['name'], author=author).exists():
+            if Recipe.objects.filter(
+                name=data['name'], author=author
+            ).exists():
                 continue
 
             recipe = Recipe.objects.create(
@@ -226,7 +239,8 @@ class Command(BaseCommand):
                 cooking_time=data['cooking_time'],
                 image=_decode_image(
                     'data:image/png;base64,'
-                    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8'
+                    'iVBORw0KGgoAAAANSUhEUgAAAAE'
+                    'AAAABCAYAAAAfFcSJAAAADUlEQVR42mP8'
                     'z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
                 ),
             )
@@ -241,9 +255,12 @@ class Command(BaseCommand):
                 ).first()
                 if ingredient is None:
                     skipped_ingredients += 1
-                    self.stdout.write(self.style.WARNING(
-                        f'  ! Ingredient not found: {ing_name} ({ing_unit}) — skipped'
-                    ))
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f'  ! Ingredient not found: '
+                            f'{ing_name} ({ing_unit}) — skipped'
+                        )
+                    )
                     continue
                 RecipeIngredient.objects.create(
                     recipe=recipe,
@@ -257,9 +274,12 @@ class Command(BaseCommand):
             f'Recipes: {created} created, {len(RECIPES) - created} existing'
         )
         if skipped_ingredients:
-            self.stdout.write(self.style.WARNING(
-                f'  Skipped ingredients (not in DB): {skipped_ingredients}'
-            ))
+            self.stdout.write(
+                self.style.WARNING(
+                    f'  Skipped ingredients (not in DB): '
+                    f'{skipped_ingredients}'
+                )
+            )
         return created
 
     @staticmethod

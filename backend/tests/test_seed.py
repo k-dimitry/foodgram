@@ -1,12 +1,14 @@
 """Тесты management-команды seed."""
+
 from io import StringIO
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+import pytest
 
 from recipes.models import Recipe, RecipeIngredient, Tag
 from tests.factories.recipes import IngredientFactory
+
 
 User = get_user_model()
 
@@ -61,7 +63,9 @@ def test_seed_creates_tags_users_recipes(seed_ingredients):
     _run_seed()
 
     assert Tag.objects.count() == 4
-    assert set(Tag.objects.values_list('slug', flat=True)) == set(SEED_TAG_SLUGS)
+    assert set(Tag.objects.values_list('slug', flat=True)) == set(
+        SEED_TAG_SLUGS
+    )
     assert User.objects.filter(email=SEED_ADMIN_EMAIL).count() == 1
     assert User.objects.filter(email__in=SEED_USER_EMAILS).count() == 3
     assert Recipe.objects.count() == 6

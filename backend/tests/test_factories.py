@@ -1,4 +1,5 @@
 """Проверки, что фабрики создают валидные объекты."""
+
 import pytest
 
 from recipes.models import Favorite, ShoppingCart
@@ -12,6 +13,7 @@ from tests.factories.recipes import (
 )
 from tests.factories.users import FollowFactory, UserFactory
 from users.models import Follow
+
 
 DEFAULT_PASSWORD = 'test_password_123'
 
@@ -41,9 +43,13 @@ def test_follow_factory_creates_follow_between_two_users():
 
     assert follow.id is not None
     assert follow.user.id != follow.author.id
-    assert Follow.objects.filter(
-        user=follow.user, author=follow.author,
-    ).count() == 1
+    assert (
+        Follow.objects.filter(
+            user=follow.user,
+            author=follow.author,
+        ).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db
@@ -92,9 +98,13 @@ def test_favorite_factory_creates_favorite():
     assert favorite.id is not None
     assert favorite.user.id is not None
     assert favorite.recipe.id is not None
-    assert Favorite.objects.filter(
-        user=favorite.user, recipe=favorite.recipe,
-    ).count() == 1
+    assert (
+        Favorite.objects.filter(
+            user=favorite.user,
+            recipe=favorite.recipe,
+        ).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db
@@ -104,6 +114,10 @@ def test_shopping_cart_factory_creates_cart_entry():
     assert cart.id is not None
     assert cart.user.id is not None
     assert cart.recipe.id is not None
-    assert ShoppingCart.objects.filter(
-        user=cart.user, recipe=cart.recipe,
-    ).count() == 1
+    assert (
+        ShoppingCart.objects.filter(
+            user=cart.user,
+            recipe=cart.recipe,
+        ).count()
+        == 1
+    )

@@ -1,4 +1,5 @@
 """Тесты API приложения recipes."""
+
 import pytest
 from rest_framework import status
 
@@ -10,6 +11,7 @@ from tests.factories.recipes import (
     TagFactory,
 )
 from tests.factories.users import FollowFactory
+
 
 MINI_PNG_DATA_URI = (
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJ'
@@ -115,7 +117,12 @@ def test_recipes_list_pagination(api_client, user):
     response = api_client.get('/api/recipes/')
 
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.data.keys()) == {'count', 'next', 'previous', 'results'}
+    assert set(response.data.keys()) == {
+        'count',
+        'next',
+        'previous',
+        'results',
+    }
     assert response.data['count'] == 7
     assert len(response.data['results']) == 6
 
@@ -154,7 +161,10 @@ def test_recipes_list_is_favorited_anon_returns_empty(api_client, recipe):
 
 
 def test_recipes_list_is_favorited_by_user(
-        auth_client, user, recipe, favorite,
+    auth_client,
+    user,
+    recipe,
+    favorite,
 ):
     response = auth_client.get('/api/recipes/?is_favorited=1')
 
@@ -165,7 +175,10 @@ def test_recipes_list_is_favorited_by_user(
 
 
 def test_recipes_list_is_in_shopping_cart_by_user(
-        auth_client, user, recipe, shopping_cart,
+    auth_client,
+    user,
+    recipe,
+    shopping_cart,
 ):
     response = auth_client.get('/api/recipes/?is_in_shopping_cart=1')
 
@@ -210,7 +223,9 @@ def test_create_recipe_returns_201(auth_client, user, tag, ingredient):
 
 
 def test_create_recipe_without_ingredients_returns_400(
-        auth_client, tag, ingredient,
+    auth_client,
+    tag,
+    ingredient,
 ):
     payload = _recipe_create_payload(tag, ingredient, ingredients=[])
 
@@ -221,10 +236,13 @@ def test_create_recipe_without_ingredients_returns_400(
 
 
 def test_create_recipe_with_duplicate_ingredients_returns_400(
-        auth_client, tag, ingredient,
+    auth_client,
+    tag,
+    ingredient,
 ):
     payload = _recipe_create_payload(
-        tag, ingredient,
+        tag,
+        ingredient,
         ingredients=[
             {'id': ingredient.id, 'amount': 10},
             {'id': ingredient.id, 'amount': 20},
@@ -238,10 +256,13 @@ def test_create_recipe_with_duplicate_ingredients_returns_400(
 
 
 def test_create_recipe_with_nonexistent_ingredient_returns_400(
-        auth_client, tag, ingredient,
+    auth_client,
+    tag,
+    ingredient,
 ):
     payload = _recipe_create_payload(
-        tag, ingredient,
+        tag,
+        ingredient,
         ingredients=[{'id': 99999, 'amount': 10}],
     )
 
@@ -261,7 +282,9 @@ def test_create_recipe_without_tags_returns_400(auth_client, tag, ingredient):
 
 
 def test_create_recipe_cooking_time_zero_returns_400(
-        auth_client, tag, ingredient,
+    auth_client,
+    tag,
+    ingredient,
 ):
     payload = _recipe_create_payload(tag, ingredient, cooking_time=0)
 
@@ -313,7 +336,8 @@ def test_update_recipe_by_author_returns_200(auth_client, user):
 
 
 def test_update_recipe_by_another_user_returns_403(
-        another_user_client, recipe,
+    another_user_client,
+    recipe,
 ):
     response = another_user_client.patch(
         f'/api/recipes/{recipe.id}/',
@@ -371,7 +395,10 @@ def test_delete_recipe_by_author_returns_204(auth_client, user):
     assert Recipe.objects.filter(id=recipe_id).count() == 0
 
 
-def test_delete_recipe_by_another_user_returns_403(another_user_client, recipe):
+def test_delete_recipe_by_another_user_returns_403(
+    another_user_client,
+    recipe,
+):
     recipe_id = recipe.id
 
     response = another_user_client.delete(f'/api/recipes/{recipe_id}/')
@@ -439,7 +466,9 @@ def test_remove_favorite_returns_204(auth_client, user, recipe, favorite):
 
 
 def test_remove_favorite_when_not_favorited_returns_400(
-        auth_client, user, recipe,
+    auth_client,
+    user,
+    recipe,
 ):
     response = auth_client.delete(f'/api/recipes/{recipe.id}/favorite/')
 
@@ -476,7 +505,10 @@ def test_add_to_cart_twice_returns_400(auth_client, user, recipe):
 
 
 def test_remove_from_cart_returns_204(
-        auth_client, user, recipe, shopping_cart,
+    auth_client,
+    user,
+    recipe,
+    shopping_cart,
 ):
     response = auth_client.delete(f'/api/recipes/{recipe.id}/shopping_cart/')
 
@@ -485,7 +517,9 @@ def test_remove_from_cart_returns_204(
 
 
 def test_remove_from_cart_when_not_added_returns_400(
-        auth_client, user, recipe,
+    auth_client,
+    user,
+    recipe,
 ):
     response = auth_client.delete(f'/api/recipes/{recipe.id}/shopping_cart/')
 
@@ -508,7 +542,10 @@ def test_download_shopping_cart_empty_returns_placeholder(auth_client, user):
 
 
 def test_download_shopping_cart_sums_ingredients(
-        auth_client, user, tag, ingredient,
+    auth_client,
+    user,
+    tag,
+    ingredient,
 ):
     sugar = IngredientFactory(name='Сахар', measurement_unit='г')
     recipe_1 = RecipeFactory(author=user)
@@ -533,7 +570,9 @@ def test_download_shopping_cart_anon_returns_401(api_client, db):
 
 @pytest.mark.integration
 def test_author_is_subscribed_true_for_subscriber(
-        auth_client, user, another_user,
+    auth_client,
+    user,
+    another_user,
 ):
     recipe = RecipeFactory(author=another_user)
     FollowFactory(user=user, author=another_user)

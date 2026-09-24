@@ -1,15 +1,19 @@
 """Тесты утилит: generate_short_code, _decode_image, load_ingredients."""
+
 import base64
 from io import StringIO
 from pathlib import Path
 
-import pytest
 from django.core.files.base import ContentFile
 from django.core.management import call_command
+import pytest
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recipe
-from recipes.models import generate_short_code as generate_short_code_func
+from recipes.models import (
+    Ingredient,
+    Recipe,
+    generate_short_code as generate_short_code_func,
+)
 from recipes.serializers import _decode_image
 from tests.factories.recipes import MINI_PNG_B64
 
@@ -34,9 +38,7 @@ def test_generate_short_code_produces_unique_values():
 
 def test_generate_short_code_uses_only_base64url_chars():
     allowed = set(
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        'abcdefghijklmnopqrstuvwxyz'
-        '0123456789-_'
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
     )
 
     for _ in range(20):
@@ -122,26 +124,36 @@ def _write_csv(tmp_path: Path, rows: list[tuple[str, str]]) -> Path:
 
 @pytest.mark.django_db
 def test_load_ingredients_creates_rows(tmp_path):
-    path = _write_csv(tmp_path, [
-        ('Сахар', 'г'),
-        ('Соль', 'г'),
-        ('Молоко', 'мл'),
-    ])
+    path = _write_csv(
+        tmp_path,
+        [
+            ('Сахар', 'г'),
+            ('Соль', 'г'),
+            ('Молоко', 'мл'),
+        ],
+    )
 
     call_command('load_ingredients', path=str(path))
 
     assert Ingredient.objects.count() == 3
-    assert Ingredient.objects.filter(
-        name='Сахар', measurement_unit='г',
-    ).exists() is True
+    assert (
+        Ingredient.objects.filter(
+            name='Сахар',
+            measurement_unit='г',
+        ).exists()
+        is True
+    )
 
 
 @pytest.mark.django_db
 def test_load_ingredients_is_idempotent(tmp_path):
-    path = _write_csv(tmp_path, [
-        ('Сахар', 'г'),
-        ('Соль', 'г'),
-    ])
+    path = _write_csv(
+        tmp_path,
+        [
+            ('Сахар', 'г'),
+            ('Соль', 'г'),
+        ],
+    )
 
     call_command('load_ingredients', path=str(path))
     call_command('load_ingredients', path=str(path))
@@ -151,11 +163,14 @@ def test_load_ingredients_is_idempotent(tmp_path):
 
 @pytest.mark.django_db
 def test_load_ingredients_deduplicates_within_csv(tmp_path):
-    path = _write_csv(tmp_path, [
-        ('Сахар', 'г'),
-        ('Сахар', 'г'),
-        ('Соль', 'г'),
-    ])
+    path = _write_csv(
+        tmp_path,
+        [
+            ('Сахар', 'г'),
+            ('Сахар', 'г'),
+            ('Соль', 'г'),
+        ],
+    )
 
     call_command('load_ingredients', path=str(path))
 

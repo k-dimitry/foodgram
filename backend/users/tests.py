@@ -1,4 +1,5 @@
 """Тесты API приложения users."""
+
 import pytest
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -6,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from tests.factories.recipes import MINI_PNG_B64, RecipeFactory
 from tests.factories.users import DEFAULT_PASSWORD, FollowFactory
 from users.models import Follow
+
 
 VALID_AVATAR_DATA_URI = f'data:image/png;base64,{MINI_PNG_B64}'
 
@@ -119,7 +121,12 @@ def test_users_list_is_paginated(api_client, user, another_user):
     response = api_client.get('/api/users/')
 
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.data.keys()) == {'count', 'next', 'previous', 'results'}
+    assert set(response.data.keys()) == {
+        'count',
+        'next',
+        'previous',
+        'results',
+    }
     assert response.data['count'] == 2
     assert len(response.data['results']) == 2
 
@@ -168,7 +175,10 @@ def test_set_password_changes_password(auth_client, user):
 def test_set_password_with_wrong_current_returns_400(auth_client, user):
     response = auth_client.post(
         '/api/users/set_password/',
-        {'current_password': 'wrong_current_xx', 'new_password': 'BrandNewPass456'},
+        {
+            'current_password': 'wrong_current_xx',
+            'new_password': 'BrandNewPass456',
+        },
         format='json',
     )
 
@@ -243,7 +253,9 @@ def test_avatar_delete_twice_returns_204(auth_client, user):
 
 
 def test_subscribe_returns_201_with_user_with_recipes(
-        auth_client, user, another_user,
+    auth_client,
+    user,
+    another_user,
 ):
     response = auth_client.post(f'/api/users/{another_user.id}/subscribe/')
 
@@ -285,7 +297,9 @@ def test_unsubscribe_returns_204(auth_client, user, another_user):
 
 
 def test_unsubscribe_when_not_subscribed_returns_400(
-        auth_client, user, another_user,
+    auth_client,
+    user,
+    another_user,
 ):
     response = auth_client.delete(f'/api/users/{another_user.id}/subscribe/')
 
@@ -300,7 +314,9 @@ def test_subscriptions_empty_returns_200_with_zero_count(auth_client, user):
     assert response.data['results'] == []
 
 
-def test_subscriptions_contains_followed_author(auth_client, user, another_user):
+def test_subscriptions_contains_followed_author(
+    auth_client, user, another_user
+):
     FollowFactory(user=user, author=another_user)
 
     response = auth_client.get('/api/users/subscriptions/')
@@ -312,7 +328,9 @@ def test_subscriptions_contains_followed_author(auth_client, user, another_user)
 
 
 def test_subscriptions_recipes_limit_limits_recipes_array(
-        auth_client, user, another_user,
+    auth_client,
+    user,
+    another_user,
 ):
     FollowFactory(user=user, author=another_user)
     RecipeFactory.create_batch(3, author=another_user)

@@ -1,8 +1,8 @@
 """Фабрики для моделей приложения recipes."""
 import base64
 
-import factory
 from django.core.files.uploadedfile import SimpleUploadedFile
+import factory
 
 from recipes.models import (
     Favorite,
@@ -13,6 +13,7 @@ from recipes.models import (
     Tag,
 )
 from tests.factories.users import UserFactory
+
 
 # Минимальный валидный PNG 1×1
 MINI_PNG_B64 = (

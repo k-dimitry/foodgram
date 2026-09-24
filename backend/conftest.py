@@ -1,6 +1,6 @@
 """Общие фикстуры и настройки для всех тестов проекта."""
-import pytest
 from django.contrib.auth.hashers import MD5PasswordHasher
+import pytest
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 

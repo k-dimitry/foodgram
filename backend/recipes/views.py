@@ -2,7 +2,6 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
-
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -60,7 +59,9 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
 
     def partial_update(self, request, *args, **kwargs):
-        """PATCH = полное обновление (коллекция требует все обязательные поля)."""
+        """PATCH = полное обновление
+        (коллекция требует все обязательные поля).
+        """
         kwargs['partial'] = False
         return self.update(request, *args, **kwargs)
 
@@ -133,7 +134,8 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             serializer = RecipeMinifiedSerializer(
-                recipe, context={'request': request},
+                recipe,
+                context={'request': request},
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -169,7 +171,8 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             serializer = RecipeMinifiedSerializer(
-                recipe, context={'request': request},
+                recipe,
+                context={'request': request},
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -191,7 +194,9 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def download_shopping_cart(self, request):
-        """GET /api/recipes/download_shopping_cart/ — txt со списком покупок."""
+        """GET /api/recipes/download_shopping_cart/ —
+        txt со списком покупок.
+        """
         ingredients = (
             RecipeIngredient.objects
             .filter(recipe__in_shopping_carts__user=request.user)

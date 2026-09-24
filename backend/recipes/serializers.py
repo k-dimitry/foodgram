@@ -43,7 +43,9 @@ class RecipeIngredientReadSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField(source='ingredient.id')
     name = serializers.CharField(source='ingredient.name')
-    measurement_unit = serializers.CharField(source='ingredient.measurement_unit')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit'
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -99,7 +101,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return False
-        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
+        return ShoppingCart.objects.filter(
+            user=request.user,
+            recipe=obj,
+        ).exists()
 
 
 class RecipeIngredientWriteSerializer(serializers.Serializer):
@@ -160,9 +165,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, value: list[dict]) -> list[dict]:
         if not value:
-            raise serializers.ValidationError(
-                'Нужен хотя бы один ингредиент.'
-            )
+            raise serializers.ValidationError('Нужен хотя бы один ингредиент.')
         ids = [item['id'] for item in value]
         if len(ids) != len(set(ids)):
             raise serializers.ValidationError(
