@@ -59,6 +59,11 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
 
+    def partial_update(self, request, *args, **kwargs):
+        """PATCH = полное обновление (коллекция требует все обязательные поля)."""
+        kwargs['partial'] = False
+        return self.update(request, *args, **kwargs)
+
     def get_serializer_class(self):
         if self.action == 'create':
             return RecipeCreateSerializer

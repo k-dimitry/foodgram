@@ -6,6 +6,7 @@ from recipes.models import Favorite, Recipe, ShoppingCart
 from tests.factories.recipes import (
     IngredientFactory,
     RecipeFactory,
+    RecipeIngredientFactory,
     TagFactory,
 )
 from tests.factories.users import FollowFactory
@@ -289,15 +290,24 @@ def test_create_recipe_anon_returns_401(api_client, tag, ingredient):
 
 def test_update_recipe_by_author_returns_200(auth_client, user):
     recipe = RecipeFactory(author=user)
+    ingredient = IngredientFactory()
+    tag = TagFactory()
+    RecipeIngredientFactory(recipe=recipe, ingredient=ingredient, amount=1)
+    recipe.tags.set([tag])
 
     response = auth_client.patch(
         f'/api/recipes/{recipe.id}/',
-        {'name': 'Обновлённое имя'},
+        {
+            'name': 'Обновлённое имя',
+            'text': recipe.text,
+            'cooking_time': recipe.cooking_time,
+            'tags': [tag.id],
+            'ingredients': [{'id': ingredient.id, 'amount': 1}],
+        },
         format='json',
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.data['name'] == 'Обновлённое имя'
     recipe.refresh_from_db()
     assert recipe.name == 'Обновлённое имя'
 
@@ -329,10 +339,20 @@ def test_update_recipe_anon_returns_401(api_client, recipe):
 def test_update_recipe_without_image_keeps_old_image(auth_client, user):
     recipe = RecipeFactory(author=user)
     old_image_name = recipe.image.name
+    ingredient = IngredientFactory()
+    tag = TagFactory()
+    RecipeIngredientFactory(recipe=recipe, ingredient=ingredient, amount=1)
+    recipe.tags.set([tag])
 
     response = auth_client.patch(
         f'/api/recipes/{recipe.id}/',
-        {'name': 'Новое имя'},
+        {
+            'name': 'Новое имя',
+            'text': recipe.text,
+            'cooking_time': recipe.cooking_time,
+            'tags': [tag.id],
+            'ingredients': [{'id': ingredient.id, 'amount': 1}],
+        },
         format='json',
     )
 

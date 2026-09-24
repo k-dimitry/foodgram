@@ -28,3 +28,7 @@ backend/static/
 test_db.sqlite3
 .coverage
 htmlcov/
+
+.postman/
+postman/
+postman_collection/diploma/

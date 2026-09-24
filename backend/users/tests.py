@@ -213,21 +213,23 @@ def test_avatar_upload_invalid_data_uri_returns_400(auth_client, user):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     user.refresh_from_db()
-    assert user.avatar.name == 'users/avatars/default.png'
+    assert not user.avatar
 
 
-def test_avatar_delete_resets_to_default(auth_client, user):
+def test_avatar_delete_resets_to_null(auth_client, user):
     auth_client.put(
         '/api/users/me/avatar/',
         {'avatar': VALID_AVATAR_DATA_URI},
         format='json',
     )
+    user.refresh_from_db()
+    assert user.avatar
 
     response = auth_client.delete('/api/users/me/avatar/')
-
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
     user.refresh_from_db()
-    assert user.avatar.name == 'users/avatars/default.png'
+    assert not user.avatar
 
 
 def test_avatar_delete_twice_returns_204(auth_client, user):
@@ -237,7 +239,7 @@ def test_avatar_delete_twice_returns_204(auth_client, user):
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     user.refresh_from_db()
-    assert user.avatar.name == 'users/avatars/default.png'
+    assert not user.avatar
 
 
 def test_subscribe_returns_201_with_user_with_recipes(

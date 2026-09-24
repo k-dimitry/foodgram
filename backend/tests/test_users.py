@@ -7,8 +7,6 @@ from users.models import Follow
 
 User = get_user_model()
 
-AVATAR_DEFAULT = 'users/avatars/default.png'
-
 
 def test_user_str_returns_username(user):
     assert str(user) == user.username
@@ -26,10 +24,11 @@ def test_user_meta_ordering_is_by_id():
     assert User._meta.ordering == ('id',)
 
 
-def test_user_avatar_field_default_is_default_png():
+def test_user_avatar_field_is_nullable():
     avatar_field = User._meta.get_field('avatar')
 
-    assert avatar_field.default == AVATAR_DEFAULT
+    assert avatar_field.null is True
+    assert avatar_field.blank is True
 
 
 def test_user_duplicate_email_raises_integrity_error(user):

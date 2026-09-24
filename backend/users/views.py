@@ -169,9 +169,8 @@ class AvatarView(APIView):
 
     def delete(self, request: Request) -> Response:
         user = request.user
-        default_path = 'users/avatars/default.png'
-        if user.avatar and user.avatar.name != default_path:
+        if user.avatar:
             user.avatar.delete(save=False)
-        user.avatar = default_path
+        user.avatar = None
         user.save(update_fields=['avatar'])
         return Response(status=status.HTTP_204_NO_CONTENT)
