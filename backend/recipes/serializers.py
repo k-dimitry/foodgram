@@ -53,15 +53,6 @@ class RecipeIngredientReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class RecipeMinifiedSerializer(serializers.ModelSerializer):
-    """RecipeMinified: {id, name, image, cooking_time}."""
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-        read_only_fields = fields
-
-
 class RecipeListSerializer(serializers.ModelSerializer):
     """RecipeList: полное представление рецепта."""
 

@@ -32,3 +32,4 @@ htmlcov/
 .postman/
 postman/
 postman_collection/diploma/
+uv.lock

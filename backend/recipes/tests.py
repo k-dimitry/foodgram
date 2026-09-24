@@ -143,7 +143,7 @@ def test_recipes_list_filter_by_tags_or_logic(api_client, user):
     tag_b = TagFactory()
     RecipeFactory(author=user, tags=[tag_a])
     RecipeFactory(author=user, tags=[tag_b])
-    RecipeFactory(author=user)  # без тегов
+    RecipeFactory(author=user)
 
     response = api_client.get(
         f'/api/recipes/?tags={tag_a.slug}&tags={tag_b.slug}',

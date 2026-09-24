@@ -6,6 +6,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
+from recipes.serializers_minified import RecipeMinifiedSerializer
+
 from .models import Follow, User
 
 
@@ -170,7 +172,6 @@ class UserWithRecipesSerializer(UserReadSerializer):
 
     def get_recipes(self, obj: User) -> list[dict]:
         # Локальный импорт для обхода циклической зависимости
-        from recipes.serializers import RecipeMinifiedSerializer
 
         qs = obj.recipes.all().order_by('-pub_date')
         limit = self._get_recipes_limit()

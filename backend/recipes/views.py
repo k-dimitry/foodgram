@@ -26,10 +26,10 @@ from .serializers import (
     IngredientSerializer,
     RecipeCreateSerializer,
     RecipeListSerializer,
-    RecipeMinifiedSerializer,
     RecipeUpdateSerializer,
     TagSerializer,
 )
+from .serializers_minified import RecipeMinifiedSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
