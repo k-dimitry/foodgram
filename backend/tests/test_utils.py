@@ -182,7 +182,7 @@ def test_load_ingredients_from_repo_csv_creates_many_rows():
     """Маркер slow — реальный CSV 2000+ строк."""
     from django.conf import settings
 
-    csv_path = Path(settings.BASE_DIR).parent / 'data' / 'ingredients.csv'
+    csv_path = Path(settings.BASE_DIR) / 'data' / 'ingredients.csv'
     if not csv_path.exists():
         pytest.skip('data/ingredients.csv не найден')
 
