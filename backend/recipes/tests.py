@@ -434,10 +434,11 @@ def test_short_link_redirects_to_spa_recipe_page(api_client, recipe):
     assert response.url == f'/recipes/{recipe.id}'
 
 
-def test_short_link_unknown_code_returns_404(api_client, db):
+def test_short_link_unknown_code_redirects_to_404(api_client, db):
     response = api_client.get('/s/unknown_code_xx/')
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_302_FOUND
+    assert response.url == '/404'
 
 
 def test_add_favorite_returns_201_with_minified(auth_client, user, recipe):

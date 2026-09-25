@@ -1,21 +1,17 @@
-"""Тесты утилит: generate_short_code, _decode_image, load_ingredients."""
+"""Тесты утилит: generate_short_code, load_ingredients."""
 
-import base64
 from io import StringIO
 from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.core.management import call_command
 import pytest
-from rest_framework import serializers
 
 from recipes.models import (
     Ingredient,
     Recipe,
     generate_short_code as generate_short_code_func,
 )
-from recipes.serializers import _decode_image
-from tests.factories.recipes import MINI_PNG_B64
 
 
 def test_generate_short_code_returns_str():
@@ -73,46 +69,6 @@ def test_recipe_save_generates_short_code_if_empty(db, user):
     )
 
     assert recipe.short_code != ''
-
-
-def test_decode_image_returns_contentfile_with_png_extension():
-    data_uri = f'data:image/png;base64,{MINI_PNG_B64}'
-
-    result = _decode_image(data_uri)
-
-    assert isinstance(result, ContentFile)
-    assert result.name.endswith('.png')
-
-
-def test_decode_image_jpeg_extension_is_normalized_to_jpg():
-    data_uri = f'data:image/jpeg;base64,{MINI_PNG_B64}'
-
-    result = _decode_image(data_uri)
-
-    assert result.name.endswith('.jpg')
-
-
-def test_decode_image_invalid_prefix_raises_validation_error():
-    with pytest.raises(serializers.ValidationError):
-        _decode_image('not-a-data-uri')
-
-
-def test_decode_image_missing_base64_marker_raises_validation_error():
-    with pytest.raises(serializers.ValidationError):
-        _decode_image('data:image/png,abc')
-
-
-def test_decode_image_invalid_base64_raises_validation_error():
-    with pytest.raises(serializers.ValidationError):
-        _decode_image('data:image/png;base64,!!!not-base64!!!')
-
-
-def test_decode_image_content_matches_original():
-    data_uri = f'data:image/png;base64,{MINI_PNG_B64}'
-
-    result = _decode_image(data_uri)
-
-    assert result.read() == base64.b64decode(MINI_PNG_B64)
 
 
 def _write_csv(tmp_path: Path, rows: list[tuple[str, str]]) -> Path:

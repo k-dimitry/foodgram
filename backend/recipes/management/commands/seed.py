@@ -12,7 +12,7 @@ from recipes.models import (
     RecipeIngredient,
     Tag,
 )
-from recipes.serializers import _decode_image
+from recipes.utils import decode_base64_image
 
 
 User = get_user_model()
@@ -237,7 +237,7 @@ class Command(BaseCommand):
                 name=data['name'],
                 text=data['text'],
                 cooking_time=data['cooking_time'],
-                image=_decode_image(
+                image=decode_base64_image(
                     'data:image/png;base64,'
                     'iVBORw0KGgoAAAANSUhEUgAAAAE'
                     'AAAABCAYAAAAfFcSJAAAADUlEQVR42mP8'

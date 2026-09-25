@@ -2,6 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+from .constants import (
+    EMAIL_MAX_LENGTH,
+    FIRST_NAME_MAX_LENGTH,
+    LAST_NAME_MAX_LENGTH,
+    USERNAME_MAX_LENGTH,
+)
+
 
 class User(AbstractUser):
     """Кастомная модель пользователя."""
@@ -9,21 +16,21 @@ class User(AbstractUser):
     email = models.EmailField(
         'email',
         unique=True,
-        max_length=254,
+        max_length=EMAIL_MAX_LENGTH,
     )
     username = models.CharField(
         'username',
-        max_length=150,
+        max_length=USERNAME_MAX_LENGTH,
         unique=True,
         validators=[UnicodeUsernameValidator()],
     )
     first_name = models.CharField(
         'first_name',
-        max_length=150,
+        max_length=FIRST_NAME_MAX_LENGTH,
     )
     last_name = models.CharField(
         'last_name',
-        max_length=150,
+        max_length=LAST_NAME_MAX_LENGTH,
     )
     avatar = models.ImageField(
         'avatar',
@@ -38,7 +45,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
+        ordering = ('username',)
 
     def __str__(self) -> str:
         return self.username
@@ -63,7 +70,7 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ('id',)
+        ordering = ('user__username', 'author__username')
         constraints = [
             models.UniqueConstraint(
                 fields=('user', 'author'),

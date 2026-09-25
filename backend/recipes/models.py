@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from .querysets import RecipeQuerySet
+
 
 class Tag(models.Model):
     """Тег для классификации рецептов."""
@@ -64,6 +66,7 @@ def generate_short_code() -> str:
 class Recipe(models.Model):
     """Рецепт: блюдо с ингредиентами, тегами и автором."""
 
+    objects = RecipeQuerySet.as_manager()
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -176,7 +179,35 @@ class RecipeIngredient(models.Model):
         return f'{self.recipe.name}: {self.ingredient.name} — {self.amount}'
 
 
-class Favorite(models.Model):
+class UserRecipeRelation(models.Model):
+    """Абстрактная база для Favorite и ShoppingCart."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='пользователь',
+    )
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        verbose_name='рецепт',
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s_unique',
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.user.username} → {self.recipe.name}'
+
+
+class Favorite(UserRecipeRelation):
     """Избранное: какие рецепты пользователь добавил в избранное."""
 
     user = models.ForeignKey(
@@ -192,22 +223,12 @@ class Favorite(models.Model):
         verbose_name='рецепт',
     )
 
-    class Meta:
+    class Meta(UserRecipeRelation.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        ordering = ('id',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_favorite',
-            ),
-        ]
-
-    def __str__(self) -> str:
-        return f'{self.user.username} → {self.recipe.name}'
 
 
-class ShoppingCart(models.Model):
+class ShoppingCart(UserRecipeRelation):
     """Список покупок: рецепты, добавленные пользователем."""
 
     user = models.ForeignKey(
@@ -223,16 +244,6 @@ class ShoppingCart(models.Model):
         verbose_name='рецепт',
     )
 
-    class Meta:
+    class Meta(UserRecipeRelation.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        ordering = ('id',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_shopping_cart',
-            ),
-        ]
-
-    def __str__(self) -> str:
-        return f'{self.user.username} → {self.recipe.name}'

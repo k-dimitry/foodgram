@@ -22,8 +22,8 @@ def test_user_required_fields_are_username_first_last():
     assert User.REQUIRED_FIELDS == ['username', 'first_name', 'last_name']
 
 
-def test_user_meta_ordering_is_by_id():
-    assert User._meta.ordering == ('id',)
+def test_user_meta_ordering_is_by_username():
+    assert User._meta.ordering == ('username',)
 
 
 def test_user_avatar_field_is_nullable():
@@ -57,8 +57,11 @@ def test_follow_str_returns_user_to_author(follow):
     assert str(follow) == expected
 
 
-def test_follow_meta_ordering_is_by_id():
-    assert Follow._meta.ordering == ('id',)
+def test_follow_meta_ordering_is_by_user_and_author():
+    assert Follow._meta.ordering == (
+        'user__username',
+        'author__username',
+    )
 
 
 def test_follow_duplicate_raises_integrity_error(follow):

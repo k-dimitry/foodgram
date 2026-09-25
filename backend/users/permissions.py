@@ -10,14 +10,3 @@ class IsAuthorOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return obj.author == request.user
-
-
-class IsAdminOrReadOnly(BasePermission):
-    """Чтение — всем, изменение — только администратору."""
-
-    message = 'У вас недостаточно прав для выполнения данного действия.'
-
-    def has_permission(self, request, view) -> bool:
-        if request.method in SAFE_METHODS:
-            return True
-        return bool(request.user and request.user.is_staff)
