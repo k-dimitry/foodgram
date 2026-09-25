@@ -139,3 +139,8 @@ class UserViewSet(DjoserUserViewSet):
             context={'request': request},
         )
         return self.get_paginated_response(serializer.data)
+
+    def get_permissions(self):
+        if self.action == 'me':
+            return [IsAuthenticated()]
+        return super().get_permissions()
